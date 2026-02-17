@@ -1,8 +1,14 @@
 symbol: SPX
 
-# Linux example path; on Windows use something like: C:/Users/<you>/Documents/MarketData/SPX
-snapshot_dir: /mnt/SPX
+# Linux + Windows paths
+snapshot_dir:
+  linux: /mnt/SPX
+  windows: C:/Users/Nathan/Documents/MarketData/SPX
 snapshot_glob: "*.json"
+
+# You can override at runtime with env var GT_SNAPSHOT_DIR
+# (useful for testing)
+#   GT_SNAPSHOT_DIR=/some/path
 
 # Your timezone (Prior Lake, MN)
 timezone: America/Chicago

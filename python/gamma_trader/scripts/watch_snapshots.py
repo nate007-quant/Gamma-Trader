@@ -26,7 +26,9 @@ def main():
     args = ap.parse_args()
 
     cfg = yaml.safe_load(Path(args.config).read_text())
-    snap_dir = Path(cfg["snapshot_dir"]).expanduser()
+    from gamma_trader.ingest.config import resolve_snapshot_dir
+
+    snap_dir = resolve_snapshot_dir(cfg).expanduser()
 
     def on_new(p: Path):
         if p.suffix.lower() != ".json":

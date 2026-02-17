@@ -18,7 +18,9 @@ def main():
     args = ap.parse_args()
 
     cfg = yaml.safe_load(Path(args.config).read_text())
-    snap_dir = Path(cfg["snapshot_dir"])
+    from gamma_trader.ingest.config import resolve_snapshot_dir
+
+    snap_dir = resolve_snapshot_dir(cfg)
     glob = cfg.get("snapshot_glob", "*.json")
 
     rows = []

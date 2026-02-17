@@ -113,6 +113,9 @@
       load().catch(err => {
         document.body.insertAdjacentHTML('beforeend', `<pre style="color:#b91c1c">${err}</pre>`);
       });
+
+      // auto-refresh every 60 seconds
+      setInterval(() => location.reload(), 60_000);
     </script>
   </body>
 </html>
