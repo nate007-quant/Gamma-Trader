@@ -79,6 +79,7 @@ def main():
     ap.add_argument("--model", default="data/model.joblib")
     ap.add_argument("--out-plan", default="data/latest_plan.json")
     ap.add_argument("--out-series", default="data/timeseries.parquet")
+    ap.add_argument("--bootstrap", action="store_true", help="On start, load today's existing snapshots")
     args = ap.parse_args()
 
     cfg = yaml.safe_load(Path(args.config).read_text())
@@ -155,10 +156,25 @@ def main():
         _write_plan_and_series(cfg, df_today=df_today, model_pack=model_pack, out_plan=out_plan, out_series=out_series)
         print(f"updated plan/series from: {p.name}")
 
+    # Bootstrap from existing snapshots for today (so restarts keep timeline)
+    if args.bootstrap:
+        try:
+            # approximate "today" by newest snapshot date present
+            candidates = sorted(snap_dir.glob("*.json"))
+            metas = [(p, parse_snapshot_filename(p.name)) for p in candidates]
+            metas = [(p, m) for (p, m) in metas if m is not None]
+            if metas:
+                newest_day = max(m.observed_dt.date().isoformat() for _, m in metas)
+                for p, m in sorted(metas, key=lambda x: x[1].observed_dt):
+                    if m.observed_dt.date().isoformat() == newest_day:
+                        on_new(p)
+        except Exception as e:
+            print(f"bootstrap failed: {e}")
+
     obs = Observer()
     obs.schedule(Handler(on_new), str(snap_dir), recursive=False)
     obs.start()
-    print(f"watching {snap_dir} ...")
+    print(f"watching {snap_dir} ... (bootstrap={bool(args.bootstrap)})")
 
     try:
         while True:
