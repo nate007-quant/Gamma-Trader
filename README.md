@@ -13,38 +13,34 @@ A cross-platform (Windows + Linux) pipeline that ingests SPX options snapshot JS
 3. Generate a daily plan markdown → `data/plan.md`
 4. Watch the snapshot folder for new files (intraday updates)
 
-## Quickstart (Linux)
+## Setup + run (Linux)
 ```bash
-cd python
-python -m venv .venv && source .venv/bin/activate
-pip install -e .
+./scripts/setup_linux.sh
 
-cp ../configs/config.example.yaml ../configs/config.yaml
-# edit configs/config.yaml if needed
+# build initial model + dashboard artifacts (run once, or whenever retraining)
+source .venv/bin/activate
 
-gt-build-dataset --config ../configs/config.yaml
-gt-train --config ../configs/config.yaml
-gt-make-plan --config ../configs/config.yaml
+gt-build-dataset --config configs/config.yaml
+gt-train --config configs/config.yaml
+gt-export-dashboard --config configs/config.yaml
 
-gt-watch --config ../configs/config.yaml
+# run API + watcher
+./scripts/run_local.sh
 ```
 
-## Quickstart (Windows)
-Same commands, using PowerShell:
+## Setup + run (Windows)
 ```powershell
-cd python
-py -m venv .venv
-.\.venv\Scripts\Activate.ps1
-pip install -e .
+.\scripts\setup_windows.ps1
 
-copy ..\configs\config.example.yaml ..\configs\config.yaml
-# edit config
+# build initial model + dashboard artifacts (run once, or whenever retraining)
+. .\.venv\Scripts\Activate.ps1
 
-gt-build-dataset --config ..\configs\config.yaml
-gt-train --config ..\configs\config.yaml
-gt-make-plan --config ..\configs\config.yaml
+gt-build-dataset --config configs\config.yaml
+gt-train --config configs\config.yaml
+gt-export-dashboard --config configs\config.yaml
 
-gt-watch --config ..\configs\config.yaml
+# run API + watcher
+.\scripts\run_local.ps1
 ```
 
 ## Notes
