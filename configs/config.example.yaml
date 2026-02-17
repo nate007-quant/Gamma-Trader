@@ -1,6 +1,12 @@
 symbol: SPX
+
+# Linux example path; on Windows use something like: C:/Users/<you>/Documents/MarketData/SPX
 snapshot_dir: /mnt/SPX
 snapshot_glob: "*.json"
+
+# Your timezone (Prior Lake, MN)
+timezone: America/Chicago
+
 interval_minutes: 15
 band_pct: 0.05
 contract_multiplier: 100
@@ -12,7 +18,12 @@ label:
   kind: direction  # direction|return
 
 # training
-training:
+ttraining:
   lookback_days: 60
   test_days: 10
-  model: lightgbm  # baseline: logistic
+  model: logistic  # logistic|lightgbm (future)
+
+# scheduling (used by cron / future automation)
+schedule:
+  daily_plan_time: "08:30"  # Central time
+  weekdays_only: true
