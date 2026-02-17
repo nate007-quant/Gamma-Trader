@@ -1,0 +1,18 @@
+symbol: SPX
+snapshot_dir: /mnt/SPX
+snapshot_glob: "*.json"
+interval_minutes: 15
+band_pct: 0.05
+contract_multiplier: 100
+strike_match_tolerance: 0.01
+
+# label target
+label:
+  horizon_minutes: 15
+  kind: direction  # direction|return
+
+# training
+training:
+  lookback_days: 60
+  test_days: 10
+  model: lightgbm  # baseline: logistic

@@ -1,0 +1,22 @@
+[project]
+name = "gamma-trader"
+version = "0.1.0"
+description = "Options-gamma feature pipeline + ML plan generator"
+requires-python = ">=3.10"
+dependencies = [
+  "pandas>=2.2",
+  "numpy>=2.0",
+  "pyyaml>=6.0",
+  "scikit-learn>=1.5",
+  "tqdm>=4.66",
+  "watchdog>=4.0",
+]
+
+[project.scripts]
+gt-build-dataset = "gamma_trader.scripts.build_dataset:main"
+gt-train = "gamma_trader.scripts.train:main"
+gt-make-plan = "gamma_trader.scripts.make_plan:main"
+gt-watch = "gamma_trader.scripts.watch_snapshots:main"
+
+[tool.ruff]
+line-length = 100
