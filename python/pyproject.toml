@@ -16,6 +16,7 @@ dependencies = [
 gt-build-dataset = "gamma_trader.scripts.build_dataset:main"
 gt-train = "gamma_trader.scripts.train:main"
 gt-make-plan = "gamma_trader.scripts.make_plan:main"
+gt-export-dashboard = "gamma_trader.scripts.export_for_dashboard:main"
 gt-watch = "gamma_trader.scripts.watch_snapshots:main"
 
 [tool.ruff]

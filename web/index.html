@@ -1,0 +1,118 @@
+<!doctype html>
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Gamma Trader Dashboard</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+    <style>
+      body { font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto; margin: 24px; color: #111; }
+      .row { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+      .card { border: 1px solid #e5e7eb; border-radius: 12px; padding: 16px; }
+      h1 { margin: 0 0 8px; }
+      .muted { color: #6b7280; }
+      .kpi { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+      .kpi div { padding: 10px; background: #f9fafb; border-radius: 10px; border: 1px solid #eef2f7; }
+      code { background: #f3f4f6; padding: 2px 6px; border-radius: 6px; }
+      canvas { width: 100% !important; height: 360px !important; }
+    </style>
+  </head>
+  <body>
+    <h1>Gamma Trader Dashboard</h1>
+    <div class="muted">Local dashboard. Data comes from <code>/plan/latest</code> and <code>/series/today</code>.</div>
+
+    <div style="height:16px"></div>
+
+    <div class="row">
+      <div class="card">
+        <h2 style="margin-top:0">Daily plan</h2>
+        <div id="plan" class="kpi"></div>
+      </div>
+      <div class="card">
+        <h2 style="margin-top:0">Model</h2>
+        <div id="model" class="kpi"></div>
+      </div>
+    </div>
+
+    <div style="height:16px"></div>
+
+    <div class="row">
+      <div class="card">
+        <h2 style="margin-top:0">Spot + key levels</h2>
+        <canvas id="chartSpot"></canvas>
+      </div>
+      <div class="card">
+        <h2 style="margin-top:0">P(up) next interval</h2>
+        <canvas id="chartProb"></canvas>
+      </div>
+    </div>
+
+    <script>
+      const apiBase = (location.port === "8000") ? "" : "http://localhost:8000";
+
+      function kv(el, label, value) {
+        const d = document.createElement('div');
+        d.innerHTML = `<div class=muted style="font-size:12px">${label}</div><div style="font-size:18px">${value}</div>`;
+        el.appendChild(d);
+      }
+
+      async function load() {
+        const plan = await fetch(`${apiBase}/plan/latest`).then(r=>r.json());
+        const series = await fetch(`${apiBase}/series/today`).then(r=>r.json());
+
+        const planEl = document.getElementById('plan');
+        planEl.innerHTML = "";
+        kv(planEl, "Symbol", plan.symbol);
+        kv(planEl, "Date", plan.date);
+        kv(planEl, "Spot", plan.latest.spot.toFixed(2));
+        kv(planEl, "Call wall", plan.latest.call_wall ?? "—");
+        kv(planEl, "Put wall", plan.latest.put_wall ?? "—");
+        kv(planEl, "Magnet", plan.latest.magnet ?? "—");
+
+        const modelEl = document.getElementById('model');
+        modelEl.innerHTML = "";
+        kv(modelEl, "Target", plan.target);
+        kv(modelEl, "P(up)", plan.latest.p_up.toFixed(3));
+        kv(modelEl, "Bias", plan.latest.bias);
+        kv(modelEl, "Flip", plan.latest.flip ?? "—");
+        kv(modelEl, "Pressure", plan.latest.pressure ?? "—");
+
+        const labels = series.map(x => x.ts.slice(11,16));
+        const spot = series.map(x => x.spot);
+        const callWall = series.map(x => x.call_wall);
+        const putWall = series.map(x => x.put_wall);
+        const magnet = series.map(x => x.magnet);
+        const pUp = series.map(x => x.p_up);
+
+        new Chart(document.getElementById('chartSpot'), {
+          type: 'line',
+          data: {
+            labels,
+            datasets: [
+              { label: 'Spot', data: spot, borderColor: '#111827', tension: 0.2 },
+              { label: 'CallWall', data: callWall, borderColor: '#2563eb', borderDash: [6,6], tension: 0.2 },
+              { label: 'PutWall', data: putWall, borderColor: '#dc2626', borderDash: [6,6], tension: 0.2 },
+              { label: 'Magnet', data: magnet, borderColor: '#059669', borderDash: [6,6], tension: 0.2 },
+            ]
+          },
+          options: { responsive: true, scales: { x: { grid: { display: false } } } }
+        });
+
+        new Chart(document.getElementById('chartProb'), {
+          type: 'line',
+          data: {
+            labels,
+            datasets: [
+              { label: 'P(up)', data: pUp, borderColor: '#7c3aed', tension: 0.2 },
+            ]
+          },
+          options: { responsive: true, scales: { y: { min: 0, max: 1 }, x: { grid: { display: false } } } }
+        });
+      }
+
+      load().catch(err => {
+        document.body.insertAdjacentHTML('beforeend', `<pre style="color:#b91c1c">${err}</pre>`);
+      });
+    </script>
+  </body>
+</html>
